@@ -1,0 +1,7 @@
+{
+    "r.alwaysUseActiveTerminal": true,
+    "r.bracketedPaste": true,
+    "r.lsp.debug": true,
+    "r.rpath.linux": "/home/tpob/miniconda3/envs/dtcmparser/bin/R",
+    "r.rterm.linux": "/home/tpob/miniconda3/envs/dtcmparser/bin/radian"
+}

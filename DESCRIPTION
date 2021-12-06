@@ -1,0 +1,11 @@
+Package: dtcmparser
+Title: A Package Reads deepTools computeMatrix output
+Version: 0.0.1
+Authors@R: 
+    person("JW", "Yu", , "tpob@tpob.xyz", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: This package reads deepTools compute Matrix output and provide easily operation such as rowmeans and colmeans over sample/reference group.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
