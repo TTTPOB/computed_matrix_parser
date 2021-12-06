@@ -5,7 +5,17 @@ Authors@R:
     person("JW", "Yu", , "tpob@tpob.xyz", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: This package reads deepTools compute Matrix output and provide easily operation such as rowmeans and colmeans over sample/reference group.
+Depends: R (>= 4.0.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+LazyData: true
+Imports:
+    dplyr,
+    readr,
+    jsonlite,
+    R6
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

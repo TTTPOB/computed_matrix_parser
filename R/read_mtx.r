@@ -1,14 +1,65 @@
-suppressPackageStartupMessages({
-    library(tidyverse)
-    library(jsonlite)
-})
+import::here(R6, R6Class)
+import::here(magrittr, "%>%")
+import::here(purrr, map, reduce, imap)
+import::here(dplyr, .all = TRUE)
+import::here(readr, .all = TRUE)
+import::here(jsonlite, .all = TRUE)
+import::here(stringr, .all = TRUE)
+
+#' @export
+computed_matrix <- R6Class("computed_matrix", list(
+    metadata = NULL,
+    sample_matrix_list = list(),
+    sample_mean_coverage = list(),
+    region_total_coverage = list(),
+    initialize = function(metadata, sample_matrix) {
+        self$metadata <- metadata
+        self$sample_matrix_list <- sample_matrix
+    },
+    calculate_mean_coverage_each_sample = function() {
+        dflist <- self$sample_matrix_list
+        sample_mean_coverage <- dflist %>%
+            imap(function(df, name) {
+                splited_by_group_label <- df %>%
+                    group_by(group_label) %>%
+                    group_split() %>%
+                    setNames(df$group_label %>% unique())
+
+                mean_coverage_per_group <- splited_by_group_label %>%
+                    imap(function(df, group_label) {
+                        df <- df %>% select(!group_label)
+                        mtx <- df %>% as.matrix()
+                        colMeans <- mtx %>% colMeans()
+                        return(colMeans)
+                    })
+                return(mean_coverage_per_group)
+            })
+        self$sample_mean_coverage <- sample_mean_coverage
+    },
+    calculate_total_coverage_each_region = function() {
+        total_coverage_each_region <- self$sample_matrix_list %>%
+            imap(function(df, name) {
+                df %>%
+                    group_by(group_label) %>%
+                    group_split() %>%
+                    setNames(df$group_label %>% unique()) %>%
+                    imap(function(df, group_label) {
+                        df %>%
+                            select(!group_label) %>%
+                            as.matrix() %>%
+                            rowSums()
+                    })
+            })
+        self$region_total_coverage <- total_coverage_each_region
+    }
+))
 
 #' @export
 read_computed_matrix <- function(matrix_path, offset = 6, df_obj = NULL) {
     if (is.null(df_obj)) {
         df <- read_tsv(
             skip = 1,
-            file = df_path,
+            file = matrix_path,
             col_names = F,
             col_types = cols(
                 X1 = "c",
@@ -27,9 +78,9 @@ read_computed_matrix <- function(matrix_path, offset = 6, df_obj = NULL) {
     } else {
         df <- df_obj
     }
-    metadata <- readLines(gzfile(df_path), 1) %>%
+    metadata <- readLines(gzfile(matrix_path), 1) %>%
         str_remove("^@") %>%
-        fromJSON(json_str = .)
+        fromJSON()
     df_splited <- list()
     df_splited <- map(
         seq_len(length(metadata$sample_labels)),
@@ -52,8 +103,11 @@ read_computed_matrix <- function(matrix_path, offset = 6, df_obj = NULL) {
             }
             return(df_sample)
         }
+    ) %>%
+        setNames(metadata$sample_labels)
+    res <- computed_matrix$new(
+        metadata = metadata,
+        sample_matrix = df_splited
     )
-    res <- c(df_splited, list(metadata))
-    names(res) <- c(metadata$sample_labels, "metadata")
     return(res)
 }

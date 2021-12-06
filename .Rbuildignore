@@ -2,3 +2,4 @@
 ^.vscode
 ^.gitignore
 ^.here
+^adhoc_test.r
