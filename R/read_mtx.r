@@ -1,7 +1,8 @@
 import::here(R6, R6Class)
 import::here(magrittr, "%>%")
-import::here(purrr, map, reduce, imap)
+import::here(purrr, map, reduce, imap, imap_dfr)
 import::here(dplyr, .all = TRUE)
+import::here(tibble, .all = TRUE)
 import::here(readr, .all = TRUE)
 import::here(jsonlite, .all = TRUE)
 import::here(stringr, .all = TRUE)
@@ -37,7 +38,25 @@ computed_matrix <- R6Class("computed_matrix", list(
                     })
                 return(mean_coverage_per_group)
             })
-        self$sample_mean_coverage <- sample_mean_coverage
+
+        self$sample_mean_coverage <- self$metadata$group_labels %>%
+            map(
+                function(group_label) {
+                    coverage_mtx <- sample_mean_coverage %>%
+                        imap_dfr(
+                            function(content, name) {
+                                content_group<-content[[group_label]]
+                                print(content_group)
+                                content_group["samplename"] <- name
+                                return(content_group)
+                            }
+                        ) %>%
+                        as.data.frame() %>%
+                        column_to_rownames("samplename") %>%
+                        as.matrix()
+                }
+            ) %>%
+            setNames(self$metadata$group_labels)
     },
     calculate_total_coverage_each_region = function() {
         total_coverage_each_region <- self$sample_matrix_list %>%
