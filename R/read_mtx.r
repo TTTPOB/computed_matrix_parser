@@ -46,7 +46,6 @@ computed_matrix <- R6Class("computed_matrix", list(
                         imap_dfr(
                             function(content, name) {
                                 content_group<-content[[group_label]]
-                                print(content_group)
                                 content_group["samplename"] <- name
                                 return(content_group)
                             }
