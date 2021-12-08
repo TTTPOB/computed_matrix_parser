@@ -29,8 +29,11 @@ computed_matrix <- R6Class("computed_matrix", list(
                     imap(function(df, group_label) {
                         df <- df %>% select(!group_label)
                         mtx <- df %>% as.matrix()
-                        colMeans <- mtx %>% colMeans()
-                        return(colMeans)
+                        col_means_ <- mtx %>% colMeans()
+                        names(col_means_) <- seq_len(length(col_means_)) %>%
+                            as.character() %>%
+                            paste0("X_", .)
+                        return(col_means_)
                     })
                 return(mean_coverage_per_group)
             })
